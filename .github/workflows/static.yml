@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Sách THCS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chat-popup {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: white;
+            width: 300px;
+            height: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        .chat-header {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-body {
+            padding: 10px;
+            height: 320px;
+            overflow-y: auto;
+        }
+        .chat-input {
+            padding: 10px;
+            border-top: 1px solid #ccc;
+            display: flex;
+        }
+        .chat-input input {
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 8px;
+            margin-right: 5px;
+        }
+        .chat-input button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 10px;
+            cursor: pointer;
+        }
+        .chat-message {
+            margin-bottom: 10px;
+        }
+        .user-message {
+            text-align: right;
+            color: blue;
+        }
+        .bot-message {
+            text-align: left;
+            color: green;
+        }
+    </style>
+</head>
+<body class="bg-blue-50 p-4"> <header class="bg-white text-blue-600 text-center py-4 rounded-md shadow-md mb-8"> <h1 class="text-2xl font-semibold">Trang Sách THCS</h1>
+        <p class="text-md">Chào mừng các bạn đến với trang sách trực tuyến!</p>
+    </header>
+
+    <main class="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <section class="bg-white rounded-md shadow-md p-4">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">Sách Giáo Khoa</h2>
+            <div id="book-list-container" class="space-y-4">
+                </div>
+            <button id="add-book-button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4">Thêm sách</button>
+        </section>
+
+        <section class="bg-white rounded-md shadow-md p-4">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">Tư Liệu Ảnh</h2>
+            <div id="image-list" class="grid grid-cols-2 gap-4">
+                </div>
+            <button id="add-image-button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4">Thêm ảnh</button>
+        </section>
+
+        <section class="bg-white rounded-md shadow-md p-4">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">Liên Kết Hữu Ích</h2>
+            <ul id="link-list" class="list-disc list-inside">
+                </ul>
+            <button id="add-link-button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4">Thêm liên kết</button>
+        </section>
+
+        <section class="bg-white rounded-md shadow-md p-4 col-span-full">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">Các hoạt động của trường</h2>
+            <div id="school-activities" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                </div>
+            <button id="add-activity-button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4">Thêm hoạt động</button>
+        </section>
+    </main>
+
+    <div id="add-resource-form" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-6 w-full max-w-md hidden">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4" id="resource-form-title">Thêm Tài Nguyên</h2>
+        <form id="resource-form" class="space-y-4">
+            <div>
+                <label for="resource-name" class="block text-gray-700 text-sm font-bold mb-2">Tên:</label>
+                <input type="text" id="resource-name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div id="resource-url-container">
+                <label for="resource-url" class="block text-gray-700 text-sm font-bold mb-2">Đường dẫn:</label>
+                <input type="url" id="resource-url" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div id="resource-file-container" class="hidden">
+                <label for="resource-file" class="block text-gray-700 text-sm font-bold mb-2">Tệp:</label>
+                <input type="file" id="resource-file" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div>
+                <label for="resource-type" class="block text-gray-700 text-sm font-bold mb-2">Loại:</label>
+                <select id="resource-type" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="book">Sách giáo khoa</option>
+                    <option value="image">Ảnh</option>
+                    <option value="link">Liên kết</option>
+                    <option value="activity">Hoạt động</option>
+                </select>
+            </div>
+            <div id="book-set-grade-container">
+                <div>
+                    <label for="resource-book-set" class="block text-gray-700 text-sm font-bold mb-2">Bộ sách:</label>
+                    <select id="resource-book-set" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="all">Tất cả</option>
+                        <option value="ket-noi-tri-thuc">Kết nối tri thức</option>
+                        <option value="chan-troi-sang-tao">Chân trời sáng tạo</option>
+                        <option value="canh-dieu">Cánh diều</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="resource-grade" class="block text-gray-700 text-sm font-bold mb-2">Khối lớp:</label>
+                    <select id="resource-grade" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="all">Tất cả</option>
+                        <option value="6">Lớp 6</option>
+                        <option value="7">Lớp 7</option>
+                        <option value="8">Lớp 8</option>
+                        <option value="9">Lớp 9</option>
+                    </select>
+                </div>
+            </div>
+            <div id="activity-description-container" class="hidden">
+                <label for="resource-description" class="block text-gray-700 text-sm font-bold mb-2">Mô tả:</label>
+                <textarea id="resource-description" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Lưu</button>
+            <button type="button" id="cancel-resource-button" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-2">Hủy</button>
+        </form>
+    </div>
+
+    <button id="chat-button" class="fixed bottom-4 right-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline">Chat AI</button>
+    <div id="chat-popup" class="chat-popup">
+        <div class="chat-header bg-blue-500 text-white">
+            <h3 class="text-lg font-semibold">Chat với AI</h3>
+            <button id="close-chat-button" class="text-white">&times;</button>
+        </div>
+        <div class="chat-body" id="chat-log">
+            </div>
+        <div class="chat-input">
+            <input type="text" id="chat-input-box" placeholder="Nhập câu hỏi..." class="border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button id="send-chat-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Gửi</button>
+        </div>
+    </div>
+
+<script>
+    const bookListContainer = document.getElementById('book-list-container');
+    const imageList = document.getElementById('image-list');
+    const linkList = document.getElementById('link-list');
+    const addResourceButton = document.getElementById('add-book-button');
+    const addResourceForm = document.getElementById('add-resource-form');
+    const cancelResourceButton = document.getElementById('cancel-resource-button');
+    const resourceForm = document.getElementById('resource-form');
+    const resourceTypeSelect = document.getElementById('resource-type');
+    const resourceUrlContainer = document.getElementById('resource-url-container');
+    const resourceFileContainer = document.getElementById('resource-file-container');
+    const resourceNameInput = document.getElementById('resource-name');
+    const resourceUrlInput = document.getElementById('resource-url');
+    const resourceFileInput = document.getElementById('resource-file');
+    const resourceFormTitle = document.getElementById('resource-form-title');
+    const resourceBookSetSelect = document.getElementById('resource-book-set');
+    const resourceGradeSelect = document.getElementById('resource-grade');
+    const bookSetGradeContainer = document.getElementById('book-set-grade-container');
+    const schoolActivitiesContainer = document.getElementById('school-activities');
+    const addActivityButton = document.getElementById('add-activity-button');
+    const activityDescriptionContainer = document.getElementById('activity-description-container');
+    const resourceDescriptionInput = document.getElementById('resource-description');
+
+
+    let resources = {
+        book: [],
+        image: [],
+        link: [],
+        activity: []
+    };
+
+    if (localStorage.getItem('resources')) {
+        resources = JSON.parse(localStorage.getItem('resources'));
+    }
+
+    function displayResources() {
+        bookListContainer.innerHTML = '';
+        imageList.innerHTML = '';
+        linkList.innerHTML = '';
+        schoolActivitiesContainer.innerHTML = '';
+
+        const bookSets = ['Kết nối tri thức', 'Chân trời sáng tạo', 'Cánh diều'];
+        const grades = ['Lớp 6', 'Lớp 7', 'Lớp 8', 'Lớp 9'];
+
+        bookSets.forEach(bookSet => {
+            const bookSetDiv = document.createElement('div');
+            bookSetDiv.className = "mb-4 p-4 bg-white rounded-md shadow-sm";
+            bookSetDiv.innerHTML = `<h3 class="text-lg font-semibold text-blue-700 mb-2">${bookSet}</h3>`;
+
+            grades.forEach(grade => {
+                const gradeDiv = document.createElement('div');
+                gradeDiv.className = "mb-2";
+                gradeDiv.innerHTML = `<h4 class="text-md font-medium text-gray-600">${grade}</h4>`;
+                const gradeBooksList = document.createElement('ul');
+                gradeBooksList.className = "list-disc list-inside ml-5 space-y-1";
+
+                resources.book
+                    .filter(book =>
+                        (book.bookSet === 'all' || book.bookSet === bookSet.toLowerCase().replace(/ /g, '-')) &&
+                        (book.grade === 'all' || book.grade === grade.slice(-1))
+                    )
+                    .forEach(book => {
+                        const listItem = document.createElement('li');
+                        listItem.className = "py-1 border-b border-gray-200 text-gray-700";
+                        listItem.textContent = book.name;
+                        gradeBooksList.appendChild(listItem);
+                    });
+
+                if (gradeBooksList.children.length > 0) {
+                    gradeDiv.appendChild(gradeBooksList);
+                    bookSetDiv.appendChild(gradeDiv);
+                }
+            });
+            bookListContainer.appendChild(bookSetDiv);
+        });
+
+        resources.image.forEach(image => {
+            const imageElement = document.createElement('img');
+            imageElement.src = image.url;
+            imageElement.alt = image.name;
+            imageElement.className = "rounded-md";
+            imageList.appendChild(imageElement);
+        });
+
+        resources.link.forEach(link => {
+            const listItem = document.createElement('li');
+            listItem.className = "py-2 border-b border-gray-200";
+            const linkElement = document.createElement('a');
+            linkElement.href = link.url;
+            linkElement.textContent = link.name;
+            linkElement.target = "_blank";
+            linkElement.rel = "noopener noreferrer";
+            linkElement.className = "text-blue-600 hover:text-blue-800";
+            listItem.appendChild(linkElement);
+            linkList.appendChild(listItem);
+        });
+
+        resources.activity.forEach(activity => {
+            const activityElement = document.createElement('div');
+            activityElement.className = "bg-white rounded-md shadow-md p-4";
+            activityElement.innerHTML = `
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">${activity.name}</h3>
+                <img src="${activity.url}" alt="${activity.name}" class="rounded-md mb-2">
+                <p class="text-gray-700">${activity.description || ''}</p>
+            `;
+            schoolActivitiesContainer.appendChild(activityElement);
+        });
+    }
+
+    addResourceButton.addEventListener('click', () => {
+        addResourceForm.classList.remove('hidden');
+        resourceForm.reset();
+        resourceFormTitle.textContent = "Thêm Tài Nguyên";
+        resourceNameInput.value = '';
+        resourceUrlInput.value = '';
+        resourceFileInput.value = '';
+        resourceTypeSelect.value = 'book';
+        resourceBookSetSelect.value = 'all';
+        resourceGradeSelect.value = 'all';
+        resourceUrlContainer.classList.remove('hidden');
+        resourceFileContainer.classList.add('hidden');
+        bookSetGradeContainer.classList.remove('hidden');
+        activityDescriptionContainer.classList.add('hidden');
+    });
+
+    addActivityButton.addEventListener('click', () => {
+        addResourceForm.classList.remove('hidden');
+        resourceForm.reset();
+        resourceFormTitle.textContent = "Thêm Hoạt Động";
+        resourceNameInput.value = '';
+        resourceUrlInput.value = '';
+        resourceFileInput.value = '';
+        resourceTypeSelect.value = 'activity';
+        resourceUrlContainer.classList.add('hidden');
+        resourceFileContainer.classList.remove('hidden');
+        bookSetGradeContainer.classList.add('hidden');
+        activityDescriptionContainer.classList.remove('hidden');
+    });
+
+    cancelResourceButton.addEventListener('click', () => {
+        addResourceForm.classList.add('hidden');
+    });
+
+    resourceTypeSelect.addEventListener('change', (event) => {
+        if (event.target.value === 'image') {
+            resourceUrlContainer.classList.add('hidden');
+            resourceFileContainer.classList.remove('hidden');
+            bookSetGradeContainer.classList.add('hidden');
+            activityDescriptionContainer.classList.add('hidden');
+        } else if (event.target.value === 'activity') {
+            resourceUrlContainer.classList.add('hidden');
+            resourceFileContainer.classList.remove('hidden');
+            bookSetGradeContainer.classList.add('hidden');
+            activityDescriptionContainer.classList.remove('hidden');
+        } else {
+            resourceUrlContainer.classList.remove('hidden');
+            resourceFileContainer.classList.add('hidden');
+            bookSetGradeContainer.classList.remove('hidden');
+            activityDescriptionContainer.classList.add('hidden');
+        }
+    });
+
+    resourceForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const type = resourceTypeSelect.value;
+        const name = document.getElementById('resource-name').value;
+        let url = '';
+        const bookSet = resourceBookSetSelect.value;
+        const grade = resourceGradeSelect.value;
+        const description = resourceDescriptionInput.value;
+
+        if (type === 'image') {
+            const file = resourceFileInput.files[0];
+            if (!file) {
+                alert('Vui lòng chọn file ảnh.');
+                return;
+            }
+            url = URL.createObjectURL(file);
+        } else if (type === 'activity') {
+             const file = resourceFileInput.files[0];
+            if (!file) {
+                alert('Vui lòng chọn file ảnh.');
+                return;
+            }
+            url = URL.createObjectURL(file);
+        }
+        else {
+            url = document.getElementById('resource-url').value;
+        }
+
+        if (name && url) {
+            const newResource = {
+                name,
+                url,
+                bookSet: type === 'book' ? bookSet : 'all',
+                grade: type === 'book' ? grade : 'all',
+                description: type === 'activity' ? description : ''
+            };
+
+            resources[type].push(newResource);
+            localStorage.setItem('resources', JSON.stringify(resources));
+            displayResources();
+            addResourceForm.classList.add('hidden');
+            resourceForm.reset();
+        } else {
+            alert('Vui lòng nhập tên và đường dẫn/tệp.');
+        }
+    });
+
+    // Chatbot
+    const chatButton = document.getElementById('chat-button');
+    const chatPopup = document.getElementById('chat-popup');
+    const closeChatButton = document.getElementById('close-chat-button');
+    const chatLog = document.getElementById('chat-log');
+    const chatInputBox = document.getElementById('chat-input-box');
+    const sendChatButton = document.getElementById('send-chat-button');
+
+    chatButton.addEventListener('click', () => {
+        chatPopup.style.display = 'block';
+        chatLog.innerHTML += `<div class="chat-message bot-message">Chào bạn, tôi có thể giúp gì?</div>`;
+    });
+
+    closeChatButton.addEventListener('click', () => {
+        chatPopup.style.display = 'none';
+    });
+
+    sendChatButton.addEventListener('click', () => {
+        const message = chatInputBox.value;
+        if (message.trim() !== '') {
+            chatLog.innerHTML += `<div class="chat-message user-message">${message}</div>`;
+            chatInputBox.value = '';
+
+            // Simulate AI response (replace with actual AI integration)
+            setTimeout(() => {
+                const response = getAIResponse(message);
+                chatLog.innerHTML += `<div class="chat-message bot-message">${response}</div>`;
+                chatLog.scrollTop = chatLog.scrollHeight;
+            }, 500);
+        }
+    });
+
+    function getAIResponse(message) {
+        message = message.toLowerCase();
+        if (message.includes('sách')) {
+            return "Bạn có thể tìm sách ở mục Sách Giáo Khoa trên trang chủ.";
+        } else if (message.includes('ảnh')) {
+            return "Tư liệu ảnh được đăng ở mục Tư Liệu Ảnh.";
+        } else if (message.includes('liên kết')) {
+            return "Các liên kết hữu ích có trong mục Liên Kết Hữu Ích.";
+        } else if (message.includes('toán')) {
+            return "Tôi có thể giúp bạn giải bài toán. Hãy nhập bài toán của bạn.";
+        } else if (message.includes('văn')) {
+            return "Bạn muốn hỏi về tác phẩm văn học nào?";
+        } else {
+            return "Tôi rất tiếc, tôi chưa hiểu câu hỏi của bạn. Bạn có thể hỏi lại không?";
+        }
+    }
+
+    displayResources();
+</script>
+</body>
+</html>
